@@ -12,7 +12,7 @@ app.post('/api/chat', async (req, res) => {
     const apiKey = process.env.GEMINI_API_KEY;
 
     const geminiResponse = await axios.post(
-      https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey},
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + apiKey,
       {
         contents: [{ parts: [{ text: userMessage }] }]
       }
@@ -34,5 +34,5 @@ app.post('/api/chat', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Middleware server running on port ${PORT}`);
+  console.log('Middleware server running on port ' + PORT);
 });
