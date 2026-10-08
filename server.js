@@ -26,7 +26,7 @@ app.post('/api/chat', async (req, res) => {
       reply: aiReplyText
     });
 
-  } catch (error) {
+  }ചatch (error) {
     console.error("Middleware Error:", error.message);
     res.status(500).json({ success: false, error: error.message });
   }
