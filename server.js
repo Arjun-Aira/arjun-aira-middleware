@@ -4,16 +4,15 @@ const app = express();
 
 app.use(express.json());
 
-// ജെമിനി API കീ (നിങ്ങളുടെ കീ ഇവിടെ നൽകുക)
-const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY';
-
 app.post('/api/chat', async (req, res) => {
   try {
     const userMessage = req.body.message;
     console.log("Received from ESP32:", userMessage);
 
+    const apiKey = process.env.GEMINI_API_KEY;
+
     const geminiResponse = await axios.post(
-      https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY},
+      https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey},
       {
         contents: [{ parts: [{ text: userMessage }] }]
       }
