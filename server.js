@@ -1,22 +1,28 @@
 const express = require('express');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const axios = require('axios');
 const app = express();
 
 app.use(express.json());
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.post('/api/chat', async (req, res) => {
   try {
     const userMessage = req.body.message;
     console.log("Received from ESP32:", userMessage);
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const apiKey = process.env.GEMINI_API_KEY;
 
-    const result = await model.generateContent(userMessage);
-    const response = await result.response;
-    const aiReplyText = response.text();
+    const geminiResponse = await axios.post(
+      https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey},
+      {
+        contents: [
+          {
+            parts: [{ text: userMessage }]
+          }
+        ]
+      }
+    );
 
+    const aiReplyText = geminiResponse.data.candidates[0].content.parts[0].text;
     console.log("Gemini Reply:", aiReplyText);
 
     res.json({
@@ -25,7 +31,7 @@ app.post('/api/chat', async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Middleware Error:", error.message);
+    console.error("Middleware Error:", error.response ? error.response.data : error.message);
     res.status(500).json({ success: false, error: error.message });
   }
 });
