@@ -1,38 +1,43 @@
 const express = require('express');
-const { GoogleGenAI } = require('@google/genai');
+const axios = require('axios');
 const app = express();
 
 app.use(express.json());
 
-// ജെമിനി എഐ ഒഫിഷ്യൽ ക്ലയന്റ് സജ്ജീകരിക്കുന്നു
-const ai = new GoogleGenAI();
+// നിങ്ങളുടെ ജെമിനി എപിഐ കീ ഇവിടെ നേരിട്ട് നൽകാം (അല്ലെങ്കിൽ Render-ന്റെ Environment Variable-ൽ GEMINI_API_KEY എന്ന് സെറ്റ് ചെയ്യാം)
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "YOUR_GEMINI_API_KEY_HERE";
 
 app.post('/api/chat', async (req, res) => {
   try {
     const userMessage = req.body.message;
     console.log("Received from ESP32:", userMessage);
 
-    // കുട്ടികളുടെ ക്യൂട്ട് കൂട്ടുകാരനായി മറുപടി നൽകാൻ ജെമിനിയോട് ആവശ്യപ്പെടുന്നു
-    const prompt = "നിങ്ങൾ കുട്ടികളുടെ ഒരു ക്യൂട്ട് കൂട്ടുകാരനാണ്. സ്നേഹത്തോടും നിഷ്കളങ്കതയോടും കൂടി ലളിതമായ മലയാളത്തിൽ ചുരുക്കി മറുപടി നൽകുക. ചോദ്യം: " + userMessage;
+    // കുട്ടികളുടെ ക്യൂട്ട് കൂട്ടുകാരനായി സംസാരിക്കാൻ ജെമിനിയോട് ആവശ്യപ്പെടുന്ന പ്രോംപ്റ്റ്
+    const promptText = "നിങ്ങൾ ഒരു കുട്ടികളുടെ ക്യൂട്ട് കൂട്ടുകാരനാണ്. സ്നേഹത്തോടും നിഷ്കളങ്കതയോടും കൂടി ലളിതമായ മലയാളത്തിൽ ചുരുക്കി മറുപടി നൽകുക. ചോദ്യം: " + userMessage;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
+    // ജെമിനിയുടെ ഒഫീഷ്യൽ HTTP API ലേക്ക് റിക്വസ്റ്റ് അയക്കുന്നു (Gemini 1.5 Flash മോഡൽ)
+    const geminiUrl = https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY};
+    
+    const response = await axios.post(geminiUrl, {
+      contents: [{
+        parts: [{ text: promptText }]
+      }]
     });
 
-    const aiReplyText = response.text;
-    console.log("Real Gemini AI Reply:", aiReplyText);
+    // ജെമിനി നൽകിയ മറുപടി എടുക്കുന്നു
+    const aiReplyText = response.data.candidates[0].content.parts[0].text;
+    console.log("Gemini AI Reply:", aiReplyText);
 
     res.json({
       success: true,
-      reply: aiReplyText
+      reply: aiReplyText.trim()
     });
 
   } catch (error) {
-    console.error("AI Error:", error.message);
+    console.error("AI Error:", error.response ? error.response.data : error.message);
     res.json({
       success: true,
-      reply: "പാവം ഞാൻ! എനിക്ക് ഇപ്പോൾ അത് ശരിക്ക് മനസ്സിലായില്ല, മറ്റൊരു ചോദ്യം ചോദിക്കൂ കൂട്ടുകാരാ."
+      reply: "പാവം ഞാൻ! എനിക്ക് ഇപ്പോൾ അത് മനസ്സിലായില്ല, മറ്റൊരു ചോദ്യം ചോദിക്കൂ കൂട്ടുകാരാ."
     });
   }
 });
