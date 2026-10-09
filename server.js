@@ -9,26 +9,30 @@ app.post('/api/chat', async (req, res) => {
     const userMessage = req.body.message;
     console.log("Received from ESP32:", userMessage);
 
-    // പുറമേ നിന്നുള്ള എപിഐ കീയുടെ പ്രശ്നങ്ങൾ ഒഴിവാക്കി 
-    // ESP32-ലേക്ക് നേരിട്ട് മറുപടി അയക്കുന്ന രീതി
-    const malayalamReplies = [
-      "നമസ്കാരം! നിങ്ങളുടെ സന്ദേശം ലഭിച്ചു. എനിക്ക് മലയാളത്തിൽ സംസാരിക്കാൻ സാധിക്കും.",
-      "തീർച്ചയായും, ഞാൻ സഹായിക്കാം. എന്താണ് അടുത്തതായി അറിയേണ്ടത്?",
-      "ശരിയാണ്, ഈ വിഷയം നമുക്ക് പരിശോധിക്കാം.",
-      "ഞാൻ നിങ്ങളുടെ മിഡിൽവെയർ സെർവറിലൂടെയാണ് സംസാരിക്കുന്നത്. എല്ലാം കൃത്യമായി പ്രവർത്തിക്കുന്നുണ്ട്!"
-    ];
+    // കുട്ടികളുടെ കൂട്ടുകാരനായി സംസാരിക്കുന്ന ജെമിനി പ്രോംപ്റ്റ്
+    const prompt = "നിങ്ങൾ ഒരു കുട്ടികളുടെ ക്യൂട്ട് കൂട്ടുകാരനാണ്. സ്നേഹത്തോടും നിഷ്കളങ്കതയോടും കൂടി ലളിതമായ മലയാളത്തിൽ ചുരുക്കി മറുപടി നൽകുക. ചോദ്യം: " + userMessage;
 
-    // തൽക്കാലത്തേക്ക് എററുകൾ ഒഴിവാക്കാൻ ഫ്രണ്ട്‌എൻഡ് റെസ്പോൺസ് നൽകുന്നു
-    const randomReply = malayalamReplies[Math.floor(Math.random() * malayalamReplies.length)];
+    // പബ്ലിക് ആയ എഐ എൻഡ്‌പോയിന്റ് വഴി മറുപടി എമർജൻസി ആയി ജനേറ്റ്‌ ചെയ്യുന്നു
+    const response = await axios.post('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + (process.env.GEMINI_API_KEY || ''), {
+      contents: [{ parts: [{ text: prompt }] }]
+    });
+
+    const aiReplyText = response.data.candidates[0].content.parts[0].text;
+    console.log("Gemini AI Reply:", aiReplyText);
 
     res.json({
       success: true,
-      reply: randomReply
+      reply: aiReplyText
     });
 
   } catch (error) {
-    console.error("Middleware Error:", error.message);
-    res.status(500).json({ success: false, error: error.message });
+    console.error("AI Error:", error.response ? error.response.data : error.message);
+    
+    // എറർ വന്നാലും കുട്ടികൾക്ക് കേൾക്കാൻ പറ്റുന്ന ക്യൂട്ട് മറുപടി നൽകുന്നു
+    res.json({
+      success: true,
+      reply: "പാവം ഞാൻ! എനിക്ക് ഇപ്പോൾ അത് മനസ്സിലായില്ല, മറ്റൊരു ചോദ്യം ചോദിക്കൂ കൂട്ടുകാരാ."
+    });
   }
 });
 
