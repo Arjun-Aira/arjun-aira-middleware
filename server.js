@@ -10,17 +10,15 @@ app.post('/api/chat', async (req, res) => {
     console.log("Received from ESP32:", userMessage);
 
     const apiKey = process.env.GEMINI_API_KEY;
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + apiKey;
 
-    const geminiResponse = await axios.post(
-      https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey},
-      {
-        contents: [
-          {
-            parts: [{ text: userMessage }]
-          }
-        ]
-      }
-    );
+    const geminiResponse = await axios.post(url, {
+      contents: [
+        {
+          parts: [{ text: userMessage }]
+        }
+      ]
+    });
 
     const aiReplyText = geminiResponse.data.candidates[0].content.parts[0].text;
     console.log("Gemini Reply:", aiReplyText);
