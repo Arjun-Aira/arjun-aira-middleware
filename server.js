@@ -13,6 +13,7 @@ app.post('/api/chat', async (req, res) => {
 
     const promptText = "നിങ്ങൾ ഒരു കുട്ടികളുടെ ക്യൂട്ട് കൂട്ടുകാരനാണ്. സ്നേഹത്തോടും നിഷ്കളങ്കതയോടും കൂടി ലളിതമായ മലയാളത്തിൽ ചുരുക്കി മറുപടി നൽകുക. ചോദ്യം: " + userMessage;
 
+    // ഇവിടെ ബാക്ക്‌ടിക് (`) ഉപയോഗിച്ചിട്ടുണ്ട്
     const geminiUrl = https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY};
     
     const response = await axios.post(geminiUrl, {
