@@ -1,25 +1,24 @@
 const express = require('express');
-const axios = require('axios');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const app = express();
 
 app.use(express.json());
+
+// ഒഫീഷ്യൽ SDK ഉപയോഗിച്ച് ജെമിനി സെറ്റപ്പ് ചെയ്യുന്നു (AQ. കീ ഇത് ഓട്ടോമാറ്റിക് ആയി എടുത്തോളും)
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.post('/api/chat', async (req, res) => {
   try {
     const userMessage = req.body.message;
     console.log("Received from ESP32:", userMessage);
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    // ജെമിനി 1.5 ഫ്ലാഷ് മോഡൽ തിരഞ്ഞെടുക്കുന്നു
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    // ഗൂഗിൾ ക്ലൗഡ് കീക്കായി പ്രൊജക്റ്റ് പാത്ത് ഉൾപ്പെടുത്തിയുള്ള URL
-    const geminiResponse = await axios.post(
-      'https://generativelanguage.googleapis.com/v1beta/projects/198923931409/locations/global/publishers/google/models/gemini-1.5-flash:generateContent?key=' + apiKey,
-      {
-        contents: [{ parts: [{ text: userMessage }] }]
-      }
-    );
+    const result = await model.generateContent(userMessage);
+    const response = await result.response;
+    const aiReplyText = response.text();
 
-    const aiReplyText = geminiResponse.data.candidates[0].content.parts[0].text;
     console.log("Gemini Reply:", aiReplyText);
 
     res.json({
@@ -28,7 +27,7 @@ app.post('/api/chat', async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Middleware Error:", error.response ? error.response.data : error.message);
+    console.error("Middleware Error:", error.message);
     res.status(500).json({ success: false, error: error.message });
   }
 });
