@@ -4,7 +4,6 @@ const app = express();
 
 app.use(express.json());
 
-// ഒഫീഷ്യൽ SDK ഉപയോഗിച്ച് ജെമിനി സെറ്റപ്പ് ചെയ്യുന്നു (AQ. കീ ഇത് ഓട്ടോമാറ്റിക് ആയി എടുത്തോളും)
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.post('/api/chat', async (req, res) => {
@@ -12,8 +11,8 @@ app.post('/api/chat', async (req, res) => {
     const userMessage = req.body.message;
     console.log("Received from ESP32:", userMessage);
 
-    // ജെമിനി 1.5 ഫ്ലാഷ് മോഡൽ തിരഞ്ഞെടുക്കുന്നു
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    // മോഡൽ നെയിം കൃത്യമായി കോൺഫിഗർ ചെയ്യുന്നു
+    const model = genAI.getGenerativeModel({ model: "models/gemini-1.5-flash" });
 
     const result = await model.generateContent(userMessage);
     const response = await result.response;
