@@ -11,9 +11,9 @@ app.post('/api/chat', async (req, res) => {
 
     const apiKey = process.env.GEMINI_API_KEY;
 
-    // ഗൂഗിൾ ക്ലൗഡ് / പ്രൊജക്റ്റ് കീക്ക് അനുയോജ്യമായ എൻഡ്പോയിന്റ് URL
+    // ഗൂഗിൾ ക്ലൗഡ് കീക്കായി പ്രൊജക്റ്റ് പാത്ത് ഉൾപ്പെടുത്തിയുള്ള URL
     const geminiResponse = await axios.post(
-      'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=' + apiKey,
+      'https://generativelanguage.googleapis.com/v1beta/projects/198923931409/locations/global/publishers/google/models/gemini-1.5-flash:generateContent?key=' + apiKey,
       {
         contents: [{ parts: [{ text: userMessage }] }]
       }
@@ -28,7 +28,7 @@ app.post('/api/chat', async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Middleware Error:", error.message);
+    console.error("Middleware Error:", error.response ? error.response.data : error.message);
     res.status(500).json({ success: false, error: error.message });
   }
 });
