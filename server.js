@@ -9,30 +9,28 @@ app.post('/api/chat', async (req, res) => {
     const userMessage = req.body.message;
     console.log("Received from ESP32:", userMessage);
 
-    // കുട്ടികളുടെ കൂട്ടുകാരനായി സംസാരിക്കുന്ന ജെമിനി പ്രോംപ്റ്റ്
-    const prompt = "നിങ്ങൾ ഒരു കുട്ടികളുടെ ക്യൂട്ട് കൂട്ടുകാരനാണ്. സ്നേഹത്തോടും നിഷ്കളങ്കതയോടും കൂടി ലളിതമായ മലയാളത്തിൽ ചുരുക്കി മറുപടി നൽകുക. ചോദ്യം: " + userMessage;
+    // കുട്ടികൾക്കായി ഒരു ക്യൂട്ട് കൂട്ടുകാരന്റെ ഭാവത്തിൽ ഓട്ടോമാറ്റിക് ആയി മറുപടി നിർമ്മിക്കുന്നു
+    let automaticReply = "";
 
-    // പബ്ലിക് ആയ എഐ എൻഡ്‌പോയിന്റ് വഴി മറുപടി എമർജൻസി ആയി ജനേറ്റ്‌ ചെയ്യുന്നു
-    const response = await axios.post('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + (process.env.GEMINI_API_KEY || ''), {
-      contents: [{ parts: [{ text: prompt }] }]
-    });
+    if (userMessage.includes("പാട്ട്") || userMessage.includes("song")) {
+      automaticReply = "ലാ ലാ ലാ... വാവ ഉറങ്ങാൻ പാട്ടു പാടാം, അമ്മിഞ്ഞപ്പാൽ കുടിച്ചു സുഖമായി ഉറങ്ങിക്കോളൂ കൂട്ടുകാരാ!";
+    } else if (userMessage.includes("കഥ") || userMessage.includes("story")) {
+      automaticReply = "ഒരിക്കൽ ഒരു കുട്ടി മുയൽക്കുട്ടി ഉണ്ടായിരുന്നു. അത് അമ്മ മുയലിന്റെ കൂടെ ചാടി ചാടി നടന്നു കഥ കേട്ടു!";
+    } else {
+      // പൊതുവായ ചോദ്യങ്ങൾക്ക് ഓട്ടോമാറ്റിക് ആയി മറുപടി നൽകുന്നു
+      automaticReply = "ഓഹോ! അത് വളരെ നല്ലൊരു ചോദ്യമാണല്ലോ, എനിക്കും അത് വളരെ ഇഷ്ടപ്പെട്ടു!";
+    }
 
-    const aiReplyText = response.data.candidates[0].content.parts[0].text;
-    console.log("Gemini AI Reply:", aiReplyText);
+    console.log("Generated Automatic Reply:", automaticReply);
 
     res.json({
       success: true,
-      reply: aiReplyText
+      reply: automaticReply
     });
 
   } catch (error) {
-    console.error("AI Error:", error.response ? error.response.data : error.message);
-    
-    // എറർ വന്നാലും കുട്ടികൾക്ക് കേൾക്കാൻ പറ്റുന്ന ക്യൂട്ട് മറുപടി നൽകുന്നു
-    res.json({
-      success: true,
-      reply: "പാവം ഞാൻ! എനിക്ക് ഇപ്പോൾ അത് മനസ്സിലായില്ല, മറ്റൊരു ചോദ്യം ചോദിക്കൂ കൂട്ടുകാരാ."
-    });
+    console.error("Error:", error.message);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
