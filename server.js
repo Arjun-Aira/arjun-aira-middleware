@@ -10,7 +10,8 @@ app.post('/api/chat', async (req, res) => {
     console.log("Received from ESP32:", userMessage);
 
     const apiKey = process.env.GEMINI_API_KEY;
-    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + apiKey;
+    // ഏറ്റവും പുതിയ ജെമിനി ഫ്ലാഷ് മോഡൽ എൻഡ്‌പോയിന്റ്
+    const url = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=' + apiKey;
 
     const geminiResponse = await axios.post(url, {
       contents: [
