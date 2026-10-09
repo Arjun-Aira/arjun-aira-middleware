@@ -1,13 +1,13 @@
 {
-  "name": "arjun-aira-middleware",
+  "name": "middleware",
   "version": "1.0.0",
-  "description": "Middleware for Arjun & Aira doll",
+  "description": "",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "axios": "^1.6.8"
+    "axios": "^1.6.0"
   }
 }
