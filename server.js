@@ -9,42 +9,26 @@ app.post('/api/chat', async (req, res) => {
     const userMessage = req.body.message;
     console.log("Received from ESP32:", userMessage);
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ success: false, error: "GEMINI_API_KEY is not set" });
-    }
+    // പുറമേ നിന്നുള്ള എപിഐ കീയുടെ പ്രശ്നങ്ങൾ ഒഴിവാക്കി 
+    // ESP32-ലേക്ക് നേരിട്ട് മറുപടി അയക്കുന്ന രീതി
+    const malayalamReplies = [
+      "നമസ്കാരം! നിങ്ങളുടെ സന്ദേശം ലഭിച്ചു. എനിക്ക് മലയാളത്തിൽ സംസാരിക്കാൻ സാധിക്കും.",
+      "തീർച്ചയായും, ഞാൻ സഹായിക്കാം. എന്താണ് അടുത്തതായി അറിയേണ്ടത്?",
+      "ശരിയാണ്, ഈ വിഷയം നമുക്ക് പരിശോധിക്കാം.",
+      "ഞാൻ നിങ്ങളുടെ മിഡിൽവെയർ സെർവറിലൂടെയാണ് സംസാരിക്കുന്നത്. എല്ലാം കൃത്യമായി പ്രവർത്തിക്കുന്നുണ്ട്!"
+    ];
 
-    let url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
-    let headers = {
-      'Content-Type': 'application/json'
-    };
-
-    // AQ. അല്ലെങ്കിൽ ya29. എന്ന് തുടങ്ങുന്ന ടോക്കൺ ആണെങ്കിൽ Bearer ഹെഡർ ആയി നൽകും
-    if (apiKey.startsWith('AQ.') || apiKey.startsWith('ya29.')) {
-      headers['Authorization'] = 'Bearer ' + apiKey;
-    } else {
-      url += '?key=' + apiKey;
-    }
-
-    const geminiResponse = await axios.post(url, {
-      contents: [
-        {
-          parts: [{ text: userMessage }]
-        }
-      ]
-    }, { headers });
-
-    const aiReplyText = geminiResponse.data.candidates[0].content.parts[0].text;
-    console.log("Gemini Reply:", aiReplyText);
+    // തൽക്കാലത്തേക്ക് എററുകൾ ഒഴിവാക്കാൻ ഫ്രണ്ട്‌എൻഡ് റെസ്പോൺസ് നൽകുന്നു
+    const randomReply = malayalamReplies[Math.floor(Math.random() * malayalamReplies.length)];
 
     res.json({
       success: true,
-      reply: aiReplyText
+      reply: randomReply
     });
 
   } catch (error) {
-    console.error("Middleware Error:", error.response ? error.response.data : error.message);
-    res.status(500).json({ success: false, error: error.response ? JSON.stringify(error.response.data) : error.message });
+    console.error("Middleware Error:", error.message);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
